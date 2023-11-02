@@ -1,5 +1,7 @@
 from aiogram import Bot, Dispatcher
 
+import datetime,time
+
 from decouple import config
 
 API_TOKEN = config('API_TOKEN')
@@ -26,41 +28,27 @@ users = []
 
 @dp.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-    print(message)
-    print(message.chat)
+    await message.answer(f"Hello, доступные комманды /hello, /time!")
+    
+    
+    
+@dp.message(Command("hello"))
+async def command_start_handler(message: Message) -> None:
     await message.answer(f"Hello, {hbold(message.from_user.full_name)}!")
-    print(message.chat.type)
-    if message.chat.type == "private":
-        await message.answer("This is a private chat.")
-    elif message.chat.type == "group":
-        await message.answer("This is a group chat.")
-
-    if message.from_user.id not in [user.get('id', 0) for user in users]:
-        users.append({'id': message.from_user.id, 'full_name': message.from_user.full_name})
-        await message.answer(f"Рад вас бачити, ви тут вперше! Ви {len(users)}-й учасник!")
-    else:
-        await message.answer(f"Так ви ж вже тут були! Скільки разів ви будете мене вітати?")
-    await message.answer(f"Для того щоб побачити список користувачів введіть команду /users")
-
-@dp.message(Command('users'))
-async def command_users_handler(message: Message) -> None:
-    print(users)
-    text = f'Список користувачів:\n'
-    for i,user in enumerate(users, start=1):
-        text += f"{i}. {user['id']} - {user['full_name']}\n"
-    text += f'Всього користувачів: {len(users)}'
-    await message.answer(text)
-
+    
+    
+    
+    
+@dp.message(Command("time"))
+async def command_time_handler(message: Message) -> None:
+    time = datetime.datetime.now()
+    await message.answer(str(time))
 
 
 @dp.message()
-async def echo_handler(message: types.Message) -> None:
-    try:
-        # Send a copy of the received message
-        await message.send_copy(chat_id=message.chat.id)
-    except TypeError:
-        # But not all the types is supported to be copied so need to handle it
-        await message.answer("Nice try!")
+async def message_handler(message: types.Message) -> None:
+    await message.answer('Я не розумію вас. Доступні команди: /hello, /time')
+
 
 
 async def main() -> None:
