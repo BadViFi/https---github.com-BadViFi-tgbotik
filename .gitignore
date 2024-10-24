@@ -1,3 +1,4 @@
 .env
 users.txt
 keys.txt
+__pycache__
