@@ -14,6 +14,30 @@ from main_utils import *
 
 router = Router()
 
+@router.message(CommandStart())
+async def command_start_handler(message: Message) -> None:
+    user_id = message.from_user.id
+    referral_code = f"{user_id}"
+    referral_link = f"http://t.me/Superskins_bot?start={user_id}"
+    args = message.text.split()
+
+    user = get_user(user_id)
+
+    if user is None:  
+        if len(args) > 1:
+            referred_by = args[1]
+            referred_user = get_user(int(referred_by))
+            if referred_user:
+                add_user(user_id, referral_code, referred_by)
+                add_key_to_user(int(referred_by))  
+                await message.answer(f"Привет, {hbold(message.from_user.full_name)}! Вы зарегистрированы. Вот ваша реферальная ссылка: {referral_link}. Вы были приглашены пользователем с ID {referred_by}.")
+            else:
+                await message.answer("Неверный реферальный код.")
+        else:
+            add_user(user_id, referral_code)
+            await message.answer(f"Привет, {hbold(message.from_user.full_name)}! Вы зарегистрированы. Вот ваша реферальная ссылка: {referral_link}.")
+    else:
+        await message.answer(f"Вы уже зарегистрированы. Вот ваша реферальная ссылка: {referral_link}.")
 
 
 @router.message(Command("key"))
@@ -31,39 +55,8 @@ async def support(message: Message) -> None:
     await message.answer("По вопросам пишите сюда - https://t.me/freesteamacoounts_bot")
 
 
-@router.callback_query(F.data.startswith("True"))
-async def courses_handler(call: types.CallbackQuery):
-    await call.message.answer("ok")
-    
-    
-    
-    
-@router.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
-    user_id = message.from_user.id
-    referral_code = f"ref_{user_id}"
-    referral_link = f"http://t.me/Superskins_bot?start={user_id}"
-    args = message.text.split()
 
-
-    user = get_user(user_id)
-
-    if user is None:  
-        if len(args) > 1:
-            referred_by = args[1]
-            referred_user = get_user(int(referred_by))
-            if referred_user:
-                add_user(user_id, referral_code, referred_by)
-                await message.answer(f"Привет, {hbold(message.from_user.full_name)}! Вы зарегистрированы. Вот ваша реферальная ссылка: {referral_link}. Вы были приглашены пользователем с ID {referred_by}.")
-            else:
-                await message.answer("Неверный реферальный код.")
-        else:
-            add_user(user_id, referral_code)
-            await message.answer(f"Привет, {hbold(message.from_user.full_name)}! Вы зарегистрированы. Вот ваша реферальная ссылка: {referral_link}.")
-    else:
-        
-        await message.answer(f"Вы уже зарегистрированы. Вот ваша реферальная ссылка: {referral_link}.")
-
+    
 
 @router.message(Command("referrals"))
 async def view_referrals(message: Message) -> None:
@@ -80,3 +73,10 @@ async def view_referrals(message: Message) -> None:
             await message.answer("У вас пока нет рефералов.")
     else:
         await message.answer("Вы еще не зарегистрированы в системе.")
+
+
+    
+    
+@router.callback_query(F.data.startswith("True"))
+async def courses_handler(call: types.CallbackQuery):
+    await call.message.answer("ok")
